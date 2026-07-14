@@ -1,0 +1,6 @@
+.DS_Store
+.vscode/
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+*.tmp
+*.swp

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Mem Capture"
+  short_description: "Capture a conversation into the inbox"
+  default_prompt: "Use $mem-capture to preserve this conversation in the configured authoritative notes repository."
+policy:
+  allow_implicit_invocation: false

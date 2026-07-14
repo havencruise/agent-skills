@@ -1,0 +1,9 @@
+# Copy this mapping into user or installation configuration.
+# This file is an example and is not active configuration.
+notes_repository:
+  local_path: ${HOME}/path/to/notes-repository
+  # Optional when required_markers alone provide sufficiently strong identity.
+  expected_remote: git@github.com:example/notes-repository.git
+  required_markers:
+    - AGENTS.md
+    - CODEX_START_HERE.md

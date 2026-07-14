@@ -1,0 +1,6 @@
+interface:
+  display_name: "Mem Codify"
+  short_description: "Reconcile pending inbox material"
+  default_prompt: "Use $mem-codify to codify pending inbox material in the configured authoritative notes repository."
+policy:
+  allow_implicit_invocation: false

@@ -1,0 +1,81 @@
+# Agent Skills
+
+Reusable skills for LLM agents.
+
+This repository is intentionally not tied to one agent runtime. Runtime-specific metadata can live beside a skill when useful, such as `agents/openai.yaml` for Codex/OpenAI environments.
+
+## Skills
+
+- `skills/mem-capture` captures an active agent conversation into a configured authoritative notes repository inbox.
+- `skills/mem-codify` processes pending inbox material into canonical durable Markdown notes.
+
+## Install Or Update Skills
+
+Install all skills into the default Codex/OpenAI skills directory:
+
+```sh
+scripts/install-skills.sh
+```
+
+Install selected skills:
+
+```sh
+scripts/install-skills.sh mem-capture mem-codify
+```
+
+Install into another folder-based agent runtime:
+
+```sh
+scripts/install-skills.sh --target ~/.some-agent/skills --all
+```
+
+Preview an update without changing files:
+
+```sh
+scripts/install-skills.sh --dry-run
+```
+
+When a selected skill is already installed, the installer compares the installed copy with this repository, prints release notes based on the actual changed files, shows the diff, and asks for approval before updating. Identical skills are skipped.
+
+By default, an approved update moves the old installed directory aside as `skill-name.backup-YYYYMMDD-HHMMSS` before copying the new version. Use `--no-backup` when you want a direct replacement, and `--yes` when you want to approve all updates non-interactively.
+
+To update from this repository later:
+
+```sh
+git pull
+scripts/install-skills.sh
+```
+
+For unattended updates:
+
+```sh
+git pull
+scripts/install-skills.sh --yes
+```
+
+## Bootstrap A Memory Repository
+
+Create a new durable memory folder from the starter framework:
+
+```sh
+scripts/bootstrap-memory.sh ~/Documents/Personal/memory --name "Personal Memory"
+```
+
+To also write a config file used by the memory skills:
+
+```sh
+scripts/bootstrap-memory.sh ~/Documents/Personal/memory \
+  --config ~/.config/agent-memory/notes-repository.yaml
+```
+
+## Configuration
+
+The memory skills require a local notes repository configuration. Start from:
+
+```text
+examples/notes-repository.example.yaml
+```
+
+Copy it into the configuration location expected by the target runtime and update the local path, expected remote, and required markers for that machine.
+
+Do not commit machine-specific local paths, credentials, or private repository configuration.
