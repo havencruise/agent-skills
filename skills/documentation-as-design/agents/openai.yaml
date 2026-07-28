@@ -1,0 +1,4 @@
+interface:
+  display_name: "Documentation as Design"
+  short_description: "Keep durable documentation purposeful and current."
+  default_prompt: "Use $documentation-as-design to create or revise this durable document."

@@ -6,6 +6,8 @@ This repository is intentionally not tied to one agent runtime. Runtime-specific
 
 ## Skills
 
+- `skills/documentation-as-design` applies design and lifecycle discipline to durable documentation.
+- `skills/maintenance-surface` reduces unnecessary maintenance surface in code changes and reviews.
 - `skills/mem-capture` captures an active agent conversation into a configured authoritative notes repository inbox.
 - `skills/mem-codify` processes pending inbox material into canonical durable Markdown notes.
 

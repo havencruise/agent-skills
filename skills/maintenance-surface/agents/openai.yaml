@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintenance Surface"
+  short_description: "Reduce unnecessary code maintenance surface."
+  default_prompt: "Use $maintenance-surface to reduce unnecessary maintenance surface in this code change."
