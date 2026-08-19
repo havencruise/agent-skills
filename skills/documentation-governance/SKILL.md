@@ -1,6 +1,6 @@
 ---
-name: documentation-as-design
-description: Apply design principles and lifecycle discipline to durable Markdown, DOCX, PDF, plans, reports, handoffs, instructions, and documentation reviews. Use when Codex creates, edits, consolidates, supersedes, audits, publishes, or evaluates a durable artifact that another person or agent will rely on.
+name: documentation-governance
+description: Govern durable Markdown, DOCX, PDF, plans, reports, handoffs, instructions, and documentation reviews across their lifecycle. Use when Codex creates, revises, consolidates, publishes, supersedes, retires, audits, or evaluates durable artifacts that require canonical authority, evidence traceability, dependency management, controlled derived copies, and safe publication or retirement.
 ---
 
 # Documentation as Design

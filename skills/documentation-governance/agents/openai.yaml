@@ -1,4 +1,4 @@
 interface:
-  display_name: "Documentation as Design"
-  short_description: "Keep durable documentation purposeful and current."
-  default_prompt: "Use $documentation-as-design to create or revise this durable document."
+  display_name: "Documentation Governance"
+  short_description: "Govern durable documents safely across their lifecycle."
+  default_prompt: "Use $documentation-governance to govern this durable document and its lifecycle safely."

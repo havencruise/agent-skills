@@ -90,6 +90,8 @@ case "$target_root" in
   "~/"*) target_root="$HOME/${target_root#~/}" ;;
 esac
 
+backup_root="${target_root%/}-backups"
+
 available_skills() {
   find "$source_root" -mindepth 1 -maxdepth 1 -type d -exec test -f '{}/SKILL.md' ';' -print \
     | sed "s#^$source_root/##" \
@@ -112,6 +114,9 @@ fi
 
 for skill in "${skills[@]}"; do
   case "$skill" in
+    documentation-as-design)
+      die "skill documentation-as-design has been renamed to documentation-governance; install documentation-governance instead"
+      ;;
     */*|.*|'') die "invalid skill name: $skill" ;;
   esac
   [ -f "$source_root/$skill/SKILL.md" ] || die "skill not found or missing SKILL.md: $skill"
@@ -128,9 +133,10 @@ skill_has_changes() {
 }
 
 show_release_notes() {
-  skill=$1
-  src=$2
-  dst=$3
+  local skill=$1
+  local src=$2
+  local dst=$3
+  local changed_files
 
   printf '\nRelease notes for %s\n' "$skill"
   printf '%s\n' "------------------------------"
@@ -158,7 +164,8 @@ show_release_notes() {
 }
 
 approve_update() {
-  skill=$1
+  local skill=$1
+  local reply
 
   if [ "$assume_yes" -eq 1 ]; then
     return 0
@@ -173,19 +180,43 @@ approve_update() {
 }
 
 copy_skill() {
-  src=$1
-  dst=$2
+  local src=$1
+  local dst=$2
 
   if [ -e "$dst" ]; then
-    if [ "$backup" -eq 1 ]; then
-      mv "$dst" "$dst.backup-$timestamp"
-    else
-      rm -rf "$dst"
-    fi
+    retire_installed_path "$dst"
   fi
 
   mkdir -p "$dst"
   (cd "$src" && tar --exclude='.DS_Store' -cf - .) | (cd "$dst" && tar -xf -)
+}
+
+backup_destination() {
+  local installed_path=$1
+  local candidate="$backup_root/$(basename -- "$installed_path").backup-$timestamp"
+  local suffix=1
+
+  while [ -e "$candidate" ]; do
+    candidate="$backup_root/$(basename -- "$installed_path").backup-$timestamp-$suffix"
+    suffix=$((suffix + 1))
+  done
+
+  printf '%s\n' "$candidate"
+}
+
+retire_installed_path() {
+  local installed_path=$1
+  local backup_path
+
+  if [ "$backup" -eq 1 ]; then
+    backup_path=$(backup_destination "$installed_path")
+    mkdir -p "$backup_root"
+    mv "$installed_path" "$backup_path"
+    printf 'Backed up %s -> %s\n' "$installed_path" "$backup_path"
+  else
+    rm -rf "$installed_path"
+    printf 'Removed %s\n' "$installed_path"
+  fi
 }
 
 if [ "$dry_run" -eq 1 ]; then
@@ -198,13 +229,78 @@ for skill in "${skills[@]}"; do
   src="$source_root/$skill"
   dst="$target_root/$skill"
 
+  legacy_skill=
+  legacy_paths=()
+  case "$skill" in
+    documentation-governance)
+      legacy_skill=documentation-as-design
+      if [ -d "$target_root" ]; then
+        while IFS= read -r legacy_path; do
+          legacy_paths+=("$legacy_path")
+        done < <(
+          find "$target_root" -mindepth 1 -maxdepth 1 -type d \
+            \( -name "$legacy_skill" -o -name "$legacy_skill.backup-*" \) -print \
+            | sort
+        )
+      fi
+      ;;
+  esac
+
+  if [ "${#legacy_paths[@]}" -gt 0 ]; then
+    printf '\nRename migration: %s -> %s\n' "$legacy_skill" "$skill"
+    printf 'Legacy directories to retire from the discovery root:\n'
+    printf '  %s\n' "${legacy_paths[@]}"
+
+    legacy_active="$target_root/$legacy_skill"
+    if [ -e "$legacy_active" ]; then
+      show_release_notes "$skill (renamed from $legacy_skill)" "$src" "$legacy_active"
+    elif [ -e "$dst" ] && skill_has_changes "$dst" "$src"; then
+      show_release_notes "$skill" "$src" "$dst"
+    fi
+
+    if [ "$dry_run" -eq 1 ]; then
+      if [ -e "$dst" ]; then
+        if skill_has_changes "$dst" "$src"; then
+          printf '\nWould update: %s -> %s\n' "$src" "$dst"
+        else
+          printf 'Renamed skill is already up to date: %s\n' "$skill"
+        fi
+      else
+        printf '\nWould install: %s -> %s\n' "$src" "$dst"
+      fi
+
+      for legacy_path in "${legacy_paths[@]}"; do
+        if [ "$backup" -eq 1 ]; then
+          printf 'Would move legacy directory outside the discovery root: %s -> %s\n' \
+            "$legacy_path" "$(backup_destination "$legacy_path")"
+        else
+          printf 'Would remove legacy directory: %s\n' "$legacy_path"
+        fi
+      done
+      continue
+    fi
+
+    if approve_update "$legacy_skill -> $skill"; then
+      if [ ! -e "$dst" ] || skill_has_changes "$dst" "$src"; then
+        copy_skill "$src" "$dst"
+      fi
+      for legacy_path in "${legacy_paths[@]}"; do
+        retire_installed_path "$legacy_path"
+      done
+      printf 'Migrated %s -> %s\n' "$legacy_skill" "$dst"
+    else
+      printf 'Skipped rename migration: %s -> %s\n' "$legacy_skill" "$skill"
+    fi
+    continue
+  fi
+
   if [ "$dry_run" -eq 1 ]; then
     if [ -e "$dst" ]; then
       if skill_has_changes "$dst" "$src"; then
         show_release_notes "$skill" "$src" "$dst"
         printf '\nWould update: %s -> %s\n' "$src" "$dst"
         if [ "$backup" -eq 1 ]; then
-          printf 'Would back up existing directory to: %s.backup-%s\n' "$dst" "$timestamp"
+          printf 'Would back up existing directory to: %s\n' "$(backup_destination "$dst")"
         fi
       else
         printf 'Already up to date: %s\n' "$skill"

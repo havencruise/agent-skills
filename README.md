@@ -6,7 +6,7 @@ This repository is intentionally not tied to one agent runtime. Runtime-specific
 
 ## Skills
 
-- `skills/documentation-as-design` applies design and lifecycle discipline to durable documentation.
+- `skills/documentation-governance` governs durable-document authority, evidence, dependencies, publication, and retirement.
 - `skills/maintenance-surface` reduces unnecessary maintenance surface in code changes and reviews.
 - `skills/mem-capture` captures an active agent conversation into a configured authoritative notes repository inbox.
 - `skills/mem-codify` processes pending inbox material into canonical durable Markdown notes.
@@ -39,7 +39,7 @@ scripts/install-skills.sh --dry-run
 
 When a selected skill is already installed, the installer compares the installed copy with this repository, prints release notes based on the actual changed files, shows the diff, and asks for approval before updating. Identical skills are skipped.
 
-By default, an approved update moves the old installed directory aside as `skill-name.backup-YYYYMMDD-HHMMSS` before copying the new version. Use `--no-backup` when you want a direct replacement, and `--yes` when you want to approve all updates non-interactively.
+By default, an approved update moves the old installed directory outside the discovery root into a sibling `<target>-backups/` directory before copying the new version. Use `--no-backup` when you want a direct replacement, and `--yes` when you want to approve all updates non-interactively.
 
 To update from this repository later:
 
@@ -54,6 +54,19 @@ For unattended updates:
 git pull
 scripts/install-skills.sh --yes
 ```
+
+### Rename migration
+
+`documentation-as-design` has been renamed to `documentation-governance`. This is a breaking rename for explicit `$documentation-as-design` invocations and local policy references; update them to `$documentation-governance`.
+
+After updating this repository, install the renamed skill with the repository installer:
+
+```sh
+git pull
+scripts/install-skills.sh --yes documentation-governance
+```
+
+The installer moves a previously installed `documentation-as-design` directory, including same-root backups created by older installer versions, outside the discovery root and installs `documentation-governance`. It does not install a compatibility alias.
 
 ## Bootstrap A Memory Repository
 
